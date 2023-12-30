@@ -16,7 +16,6 @@ def inpaintFrame_OMP(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) 
     Returns:
         np.ndarray: Estimated frame.
     """
-
     x = problemData['x']
     IObs = np.where(~problemData['IMiss'])[0]
     p_N = len(x)
@@ -26,7 +25,7 @@ def inpaintFrame_OMP(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) 
 
     if 'D' not in param:
         param['D'] = param['D_fun'](param)
-
+    
     Dict = param['D'][IObs, :]
     W = 1 / np.sqrt(np.diag(Dict.T @ Dict))
     Dict = Dict @ np.diag(W)
@@ -42,17 +41,21 @@ def inpaintFrame_OMP(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) 
         proj = Dict.T @ residual
         pos = np.argmax(np.abs(proj))
         indx.append(pos)
-        a = np.linalg.pinv(Dict[:, indx[:j]]) @ xObs
-        residual = xObs - Dict[:, indx[:j]] @ a
+        Dict_ind = Dict[:, indx[:j]]
+        a = np.linalg.lstsq(Dict_ind, xObs, rcond=None)[0]
+        residual = xObs - Dict_ind @ a
         currResNorm2 = np.sum(residual**2)
 
     indx = indx[:len(a)]
 
     Coeff = csc_matrix((param['D'].shape[1], 1))
     if len(indx) > 0:
-        Coeff[indx] = a
-        Coeff = W * Coeff
+        Coeff[indx, 0] = a
+        W = W[:, np.newaxis] 
 
+        Coeff = csc_matrix(W * Coeff.toarray())
     y = param['D'] @ Coeff
-
+    
     return y
+
+   

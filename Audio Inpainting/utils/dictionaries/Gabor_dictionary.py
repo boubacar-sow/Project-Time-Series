@@ -1,5 +1,5 @@
 import numpy as np
-from wSine import wSine
+from utils.wSine import wSine
 from typing import Dict, Any, Optional
 
 def Gabor_Dictionary(param: Optional[Dict[str, Any]] = None) -> np.ndarray:

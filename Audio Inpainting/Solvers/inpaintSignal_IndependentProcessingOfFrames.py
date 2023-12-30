@@ -59,7 +59,7 @@ def singlethreadProcessing(x, ClipMask, param):
         'N': 256,
         'inpaintFrame': inpaintFrame_OMP,
         'OLA_frameOverlapFactor': 2,
-        'wa': wSine,
+        'wa': wRect,
         'ws': wSine,
         'SKIP_CLEAN_FRAMES': True
     }

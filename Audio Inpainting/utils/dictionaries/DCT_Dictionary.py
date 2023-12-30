@@ -1,5 +1,5 @@
 import numpy as np
-from wSine import wSine
+from utils.wSine import wSine
 from typing import Dict, Any, Optional
 
 def DCT_Dictionary(param: Optional[Dict[str, Any]] = None) -> np.ndarray:
@@ -23,7 +23,7 @@ def DCT_Dictionary(param: Optional[Dict[str, Any]] = None) -> np.ndarray:
             if k not in param or param[k] is None:
                 param[k] = defaultParam[k]
     K = param['N'] * param['redundancyFactor']
-    wd = param['wd']
+    wd = param['wd'](param['N'])
     u = np.arange(param['N'])
     k = np.arange(K)
     D = np.diag(wd) @ np.cos(np.pi/K * (np.outer(u, k) + 0.5))

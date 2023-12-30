@@ -1,5 +1,5 @@
 import numpy as np
-from snr import SNR
+from utils.evaluation.snr import SNR
 from typing import List, Tuple
 
 def SNRInpaintingPerformance(
@@ -21,7 +21,6 @@ def SNRInpaintingPerformance(
             - SNRAll (List[float]): SNRAll[0] is the original SNR, between xRef and xObs; SNRAll[1] is the obtained SNR, between xRef and xEst.
             - SNRmiss (List[float]): The same as SNRAll but computed on the missing/restored samples only.
     """
-    pass
     # Various SNR measures for inpainting performance
     SNRAll = [SNR(xRef, xObs), SNR(xRef, xEst)]
     SNRmiss = [SNR(xRef[IMiss], xObs[IMiss]), SNR(xRef[IMiss], xEst[IMiss])]

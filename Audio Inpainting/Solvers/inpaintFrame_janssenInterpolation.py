@@ -6,18 +6,15 @@ from statsmodels.regression.linear_model import yule_walker
 
 from typing import Dict, Any
 
-def inpaintFrame_OMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> np.ndarray:
+def inpaintFrame_janssenInterpolation(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> np.ndarray:
     """
-    Inpainting method based on Orthogonal Matching Pursuit (OMP) and using the Gabor dictionary. 
-    The method jointly selects cosine and sine atoms at the same frequency.
+    Frame-level inpainting method based on the linear prediction by Janssen.
 
     Args:
         problemData (dict): A dictionary containing the observed signal to be inpainted and the indices of clean samples.
             - 'x' (np.ndarray): Observed signal to be inpainted.
             - 'Imiss' (np.ndarray): Indices of clean samples.
-        param (dict): A dictionary containing the dictionary matrix (optional if param.D_fun is set), a function handle 
-        that generates the dictionary matrix param.D if param.D is not given, the analysis window, and an integer value 
-        indicating that an upper limit constraint is active if present and non-empty.
+        param (dict): A dictionary containing the order of the autoregressive model used for linear prediction.
 
     Returns:
         np.ndarray: Estimated frame.
