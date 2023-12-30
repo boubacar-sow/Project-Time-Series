@@ -1,7 +1,20 @@
 import numpy as np
 from wSine import wSine
+from typing import Dict, Any, Optional
 
-def DCT_Dictionary(param=None):
+def DCT_Dictionary(param: Optional[Dict[str, Any]] = None) -> np.ndarray:
+    """
+    Generate a windowed DCT dictionary.
+
+    Args:
+        param (dict, optional): A dictionary containing optional parameters such as frame length, 
+                                redundancy factor to adjust the number of frequencies, and weighting window function. 
+                                Defaults to None.
+
+    Returns:
+        np.ndarray: The generated DCT dictionary.
+    """
+
     defaultParam = {'N': 256, 'redundancyFactor': 1, 'wd': wSine}
     if param is None:
         param = defaultParam

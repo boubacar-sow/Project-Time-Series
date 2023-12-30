@@ -11,7 +11,37 @@ from Solvers.inpaintFrame_OMP_Gabor import inpaintFrame_OMP_Gabor
 from utils.evaluation.SNRInpaintingPerformance import SNRInpaintingPerformance
 from utils.wSine import wSine
 
-def declipOneSoundExperiment(expParam=None):
+from typing import Optional, Dict, Any
+
+def declipOneSoundExperiment(
+    expParam: Optional[Dict[str, Any]] = None
+    ) -> None:
+    
+    """
+    A simple experiment to declip a signal.
+
+    Args:
+        expParam (dict, optional): A dictionary where the user can define the experiment parameters.
+            - 'clippingLevel' (float): Clipping level between 0 and 1.
+            - 'filename' (str): File to be tested.
+            - 'destDir' (str): Path to store the results.
+            - 'solver' (dict): Solver with its parameters.
+                - 'name' (str): Name of the solver.
+                - 'function' (callable): Solver function.
+                - 'param' (dict): Parameters for the solver function.
+                    - 'N' (int): Frame length.
+                    - 'inpaintFrame' (callable): Function to inpaint a frame.
+                    - 'OMPerr' (float): Error tolerance for Orthogonal Matching Pursuit (OMP).
+                    - 'sparsityDegree' (int): Sparsity degree for OMP.
+                    - 'D_fun' (callable): Function to generate the dictionary.
+                    - 'OLA_frameOverlapFactor' (int): Overlap factor for Overlap-Add (OLA) method.
+                    - 'redundancyFactor' (int): Redundancy factor for the dictionary.
+                    - 'wd' (callable): Function to generate the weighting window for dictionary atoms.
+                    - 'wa' (callable): Function to generate the analysis window.
+                    - 'OLA_ws' (callable): Function to generate the synthesis window for OLA method.
+                    - 'SKIP_CLEAN_FRAMES' (bool): Whether to skip frames where there are no missing samples.
+                    - 'MULTITHREAD_FRAME_PROCESSING' (bool): Whether to use multithreading for frame processing.
+    """
     # Set parameters
     if expParam is None:
         expParam = {}

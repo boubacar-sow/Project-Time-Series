@@ -4,7 +4,25 @@ from scipy.signal import lfilter
 import matplotlib.pyplot as plt
 from statsmodels.regression.linear_model import yule_walker
 
-def inpaintFrame_janssenInterpolation(problemData, param):
+from typing import Dict, Any
+
+def inpaintFrame_OMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> np.ndarray:
+    """
+    Inpainting method based on Orthogonal Matching Pursuit (OMP) and using the Gabor dictionary. 
+    The method jointly selects cosine and sine atoms at the same frequency.
+
+    Args:
+        problemData (dict): A dictionary containing the observed signal to be inpainted and the indices of clean samples.
+            - 'x' (np.ndarray): Observed signal to be inpainted.
+            - 'Imiss' (np.ndarray): Indices of clean samples.
+        param (dict): A dictionary containing the dictionary matrix (optional if param.D_fun is set), a function handle 
+        that generates the dictionary matrix param.D if param.D is not given, the analysis window, and an integer value 
+        indicating that an upper limit constraint is active if present and non-empty.
+
+    Returns:
+        np.ndarray: Estimated frame.
+    """
+
     s = problemData['x'].copy()
     N = len(s)
     Im = np.where(problemData['IMiss'])[0]

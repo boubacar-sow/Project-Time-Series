@@ -1,7 +1,24 @@
 import numpy as np
 from scipy.sparse import csc_matrix
 
-def inpaintFrame_OMP_Gabor(problemData, param):
+from typing import Dict, Any
+
+def inpaintFrame_OMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> np.ndarray:
+    """
+    Inpainting method based on Orthogonal Matching Pursuit (OMP) using the Gabor dictionary. 
+    The method jointly selects cosine and sine atoms at the same frequency.
+
+    Args:
+        problemData (dict): A dictionary containing the observed signal to be inpainted and the indices of clean samples.
+            - 'x' (np.ndarray): Observed signal to be inpainted.
+            - 'Imiss' (np.ndarray): Indices of clean samples.
+        param (dict): A dictionary containing the dictionary matrix (optional if param.D_fun is set), a function handle 
+        that generates the dictionary matrix param.D if param.D is not given, and the analysis window.
+
+    Returns:
+        np.ndarray: Estimated frame.
+    """
+
     x = problemData['x']
     IObs = np.where(~problemData['IMiss'])[0]
     p_N = len(x)

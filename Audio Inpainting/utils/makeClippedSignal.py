@@ -2,8 +2,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import spectrogram, hann
 from scipy.io.wavfile import write, read
+from typing import Tuple, Optional
 
-def makeClippedSignal(x, clippingLevel, GR=False):
+def makeClippedSignal(
+    x: np.ndarray, clippingLevel: float, 
+    GR: Optional[bool] = False
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray]]:
+    
+    """
+    Normalize and clip a signal.
+
+    Args:
+        x (np.ndarray): Input signal (may be multichannel).
+        clippingLevel (float): Clipping level, between 0 and 1.
+        GR (bool, optional): Flag to generate an optional graphical display. Defaults to False.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[np.ndarray]]: A tuple of numpy arrays.
+            - xClipped (np.ndarray): Clipped signal.
+            - IClipped (np.ndarray): Boolean vector (same size as xClipped) that indexes clipped samples.
+            - xClean (np.ndarray): Clean signal.
+            - clipSizes (np.ndarray, optional): Size of the clipped segments. Only returned if GR is True.
+    """
+    pass
+
     # Normalize and clip a signal.
     xMax = 0.9999
     xClean = x / np.max(np.abs(x)) * xMax

@@ -1,0 +1,3 @@
+License: these files are made available under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 2.0 license (http://creativecommons.org/licenses/by-nc-sa/2.0/).
+Authors: Another Dreamer and Alex Q.
+Downloaded from: http://sisec2008.wiki.irisa.fr/.

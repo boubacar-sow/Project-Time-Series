@@ -4,9 +4,24 @@ from utils.dictionaries.Gabor_dictionary import Gabor_Dictionary
 from utils.dictionaries.DCT_Dictionary import DCT_Dictionary
 from utils.wRect import wRect
 from Solvers.inpaintFrame_OMP import inpaintFrame_OMP
+from typing import Dict, Any, Tuple
 
+def inpaintSignal_IndependentProcessingOfFrames(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Perform Audio De-clipping with overlapping blocks. This method uses a synthesis approach and a union of overcomplete DCT dictionary.
 
-def inpaintSignal_IndependentProcessingOfFrames(problemData, param):
+    Args:
+        problemData (dict): A dictionary containing the observed signal to be inpainted and the indices of clean samples.
+            - 'x' (np.ndarray): Clipped signal.
+            - 'Imiss' (np.ndarray): Indices of clipped samples.
+        param (dict): A dictionary containing optional parameters such as frame length, overlap factor between frames, weighting analysis window, weighting synthesis window, error threshold to stop OMP iterations, max number of non-zero components to stop OMP iterations, and other fields.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: A tuple of two numpy arrays.
+            - ReconstSignal1 (np.ndarray): Reconstructed signal (all samples generated from the synthesis model).
+            - ReconstSignal2 (np.ndarray): Reconstructed signal (only clipped samples are generated from the synthesis model).
+    """
+
     defaultParam = {
         'N': 256,
         'OLA_frameOverlapFactor': 4,

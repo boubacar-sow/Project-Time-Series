@@ -12,7 +12,24 @@ from Solvers.inpaintFrame_janssenInterpolation import inpaintFrame_janssenInterp
 from Problems.generateMissingGroupsProblem import generateMissingGroupsProblem
 from utils.evaluation.SNRInpaintingPerformance import SNRInpaintingPerformance
 
-def MissingSampleTopologyExperiment(expParam=None):
+from typing import Optional, Dict, Any
+
+def MissingSampleTopologyExperiment(expParam: Optional[Dict[str, Any]] = None) -> None:
+    """
+    For a total number of missing samples C in a frame, create several configurations of B holes with length A, 
+    where A*B=C (i.e., the total number of missing samples is constant). Test several values of C, several solvers. 
+    For each C, test all possible combinations of (A,B) such that A*B=C. Note that for each combination (A,B), 
+    a number of frames are tested at random and SNR results are then averaged.
+
+    Args:
+        expParam (dict, optional): A dictionary where the user can define the experiment parameters.
+            - 'soundDir' (str): Path to sound directory. All the .wav files in this directory will be tested at random.
+            - 'destDir' (str): Path to store the results.
+            - 'N' (int): Frame length.
+            - 'NFramesPerHoleSize' (int): Number of frames to use for each testing configuration (A,B). Results are then averaged.
+            - 'totalMissSamplesList' (list of int): List of all tested values C for the total number of missing samples in a frame.
+            - 'solvers' (list of dict): List of solvers with their parameters.
+    """
     # Set parameters
     if expParam is None:
         expParam = {}
