@@ -62,12 +62,11 @@ def inpaintFrame_OMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[str, 
         currResNorm2 = np.sum(residual**2)
 
     indx = indx[:len(a)]
-
     Coeff = csc_matrix((param['D'].shape[1], 1))
     if len(indx) > 0:
-        Coeff[indx] = a
-        Coeff = W * Coeff
-
+        Coeff[indx, 0] = a.flatten()
+        W = W.reshape(-1, 1)
+        Coeff = csc_matrix(W * Coeff.toarray())
     y = param['D'] @ Coeff
 
     return y

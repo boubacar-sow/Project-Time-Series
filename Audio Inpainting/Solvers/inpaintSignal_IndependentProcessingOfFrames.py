@@ -25,7 +25,7 @@ def inpaintSignal_IndependentProcessingOfFrames(problemData: Dict[str, np.ndarra
     defaultParam = {
         'N': 256,
         'OLA_frameOverlapFactor': 4,
-        'wa': wSine,
+        'wa': wRect,
         'OLA_ws': wSine,
         'OLA_par_waitingTime_mainProcess': 0.2,
         'OLA_par_waitingTime_thread': 0.2,
@@ -77,9 +77,10 @@ def singlethreadProcessing(x, ClipMask, param):
     x = x[:L]
     ClipMask = ClipMask[ClipMask < L]
 
-    Ibegin = np.arange(0, len(x) - bb + 1, bb // param['OLA_frameOverlapFactor'])
-    if Ibegin[-1] != L - bb + 1:
-        Ibegin = np.append(Ibegin, L - bb + 1)
+    Ibegin = np.arange(0, len(x) - bb+1, bb // param['OLA_frameOverlapFactor'])
+    if Ibegin[-1] != L - bb:
+        Ibegin = np.append(Ibegin, L - bb)
+    
     Iblk = np.outer(np.arange(bb), np.ones(len(Ibegin))) + np.outer(np.ones(bb), Ibegin)
     wa = param['wa'](bb)
     xFrames = np.diag(wa) @ x[Iblk.astype(int)]
@@ -91,11 +92,12 @@ def singlethreadProcessing(x, ClipMask, param):
     n, P = xFrames.shape
 
     Reconst = np.zeros((n, P))
+    print("server: ", param['inpaintFrame'])
     for k in range(P):
         if param['SKIP_CLEAN_FRAMES'] and np.all(blkMask[:, k]):
             continue
-        frameProblemData = {'x': xFrames[:, k], 'IMiss': ~blkMask[:, k]}
-        Reconst[:, k] = param['inpaintFrame'](frameProblemData, param)
+        frameProblemData = {'x': xFrames[:, k], 'IMiss': np.logical_not(blkMask[:, k])}
+        Reconst[:, k] = param['inpaintFrame'](frameProblemData, param).reshape(-1)
     ReconstSignal1 = np.zeros(len(x))
     ws = param['ws'](bb)
     wNorm = np.zeros(len(x))

@@ -2,7 +2,7 @@ from typing import Dict, Any
 import numpy as np
 from cvxpy import Variable, Minimize, Problem, norm
 from scipy.sparse import csc_matrix
-
+import cvxpy as cp
 
 def inpaintFrame_consOMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> np.ndarray:
     """
@@ -85,27 +85,42 @@ def inpaintFrame_consOMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[s
 
     j = len(indx)
     if np.isinf(b_ineq_pos_upper_limit):
-        a = Variable(j)
+        W_cvx = cp.Parameter(shape=(len(W[indx]), 1))
+        W_cvx.value = W[indx].reshape(-1, 1)
+        xObs = xObs.reshape(-1, 1)
+        a = cp.Variable(j)
+        a = cp.reshape(a, (j, 1))
         objective = Minimize(norm(Dict[:, indx] @ a - xObs))
-        constraints = [DictPos[:, indx] @ (W[indx] * a) >= b_ineq_pos,
-                       DictNeg[:, indx] @ (W[indx] * a) <= b_ineq_neg]
+        constraints = []
+        if DictPos[:, indx].shape[0] > 0:
+            constraints.append(DictPos[:, indx] @ cp.multiply(W_cvx, a) <= b_ineq_pos.reshape(-1, 1))
+        if DictNeg[:, indx].shape[0] > 0:
+            constraints.append(DictNeg[:, indx] @ cp.multiply(W_cvx, a) >= b_ineq_neg.reshape(-1, 1))
+
         prob = Problem(objective, constraints)
         prob.solve()
-
+        
         if prob.value > 1e3:
             objective = Minimize(norm(Dict[:, indx] @ a - xObs))
             prob = Problem(objective)
             prob.solve()
     else:
         a = Variable(j)
+        xObs = xObs.reshape(-1, 1)
         objective = Minimize(norm(Dict[:, indx] @ a - xObs))
         constraints = [DictPos[:, indx] @ (W[indx] * a) >= b_ineq_pos,
                        DictNeg[:, indx] @ (W[indx] * a) <= b_ineq_neg,
                        DictPos[:, indx] @ (W[indx] * a) <= b_ineq_pos_upper_limit,
                        DictNeg[:, indx] @ (W[indx] * a) >= b_ineq_neg_upper_limit]
+        constraints = []
+        if DictPos[:, indx].shape[0] > 0:
+            constraints.append(DictPos[:, indx] @ cp.multiply(W_cvx, a) <= b_ineq_pos.reshape(-1, 1))
+            constraints.append(DictPos[:, indx] @ cp.multiply(W_cvx, a) <= b_ineq_pos_upper_limit)
+        if DictNeg[:, indx].shape[0] > 0:
+            constraints.append(DictNeg[:, indx] @ cp.multiply(W_cvx, a) >= b_ineq_neg.reshape(-1, 1))
+            constraints.append(DictNeg[:, indx] @ cp.multiply(W_cvx, a) >= b_ineq_neg_upper_limit)
         prob = Problem(objective, constraints)
         prob.solve()
-
         if prob.value > 1e3:
             objective = Minimize(norm(Dict[:, indx] @ a - xObs))
             prob = Problem(objective)
@@ -115,10 +130,9 @@ def inpaintFrame_consOMP_Gabor(problemData: Dict[str, np.ndarray], param: Dict[s
 
     Coeff = csc_matrix((param['D'].shape[1], 1))
     if len(indx) > 0:
-        Coeff[indx, 0] = a
+        Coeff[indx, 0] = a.value
         W = W[:, np.newaxis] 
 
         Coeff = csc_matrix(W * Coeff.toarray())
     y = param['D'] @ Coeff
-
     return y

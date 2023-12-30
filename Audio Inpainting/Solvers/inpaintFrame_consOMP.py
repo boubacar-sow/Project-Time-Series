@@ -2,7 +2,7 @@ from typing import Dict, Any
 import numpy as np
 from cvxpy import Variable, Minimize, Problem, norm
 from scipy.sparse import csc_matrix
-
+import cvxpy as cp
 
 def inpaintFrame_consOMP(problemData: Dict[str, np.ndarray], param: Dict[str, Any]) -> np.ndarray:
     """
@@ -69,42 +69,60 @@ def inpaintFrame_consOMP(problemData: Dict[str, np.ndarray], param: Dict[str, An
         residual = xObs - Dict[:, indx[:j]] @ a
         currResNorm2 = np.sum(residual**2)
 
-    if np.isinf(b_ineq_pos_upper_limit):
-        a = Variable(j)
-        objective = Minimize(norm(Dict[:, indx] @ a - xObs))
-        constraints = [DictPos[:, indx] @ (np.atleast_1d(W[indx]) * a) >= b_ineq_pos,
-               DictNeg[:, indx] @ (np.atleast_1d(W[indx]) * a) <= b_ineq_neg]
+    Dict = param['D'][IObs, :]
+    W = 1. / np.sqrt(np.diag(Dict.T @ Dict))
+    Dict = Dict @ np.diag(W)
+    xObs = x[IObs]
 
-        prob = Problem(objective, constraints)
+    residual = xObs
+    maxNumCoef = param['sparsityDegree']
+    indx = []
+    currResNorm2 = E2M * 2  # set a value above the threshold in order to have/force at least one loop executed
+    j = 0
+    while currResNorm2 > E2M and j < maxNumCoef:
+        j += 1
+        proj = Dict.T @ residual
+        pos = np.argmax(np.abs(proj))
+        indx.append(pos)
+        a = np.linalg.pinv(Dict[:, indx]) @ xObs
+        residual = xObs - Dict[:, indx] @ a
+        currResNorm2 = np.sum(residual**2)
+
+    W_cvx = cp.Parameter(shape=(len(W[indx]), 1))
+    W_cvx.value = W[indx].reshape(-1, 1)
+
+    a = cp.Variable(j)
+    a = cp.reshape(a, (j, 1))
+
+    constraints = []
+    if DictPos[:, indx].shape[0] > 0:
+        constraints.append(DictPos[:, indx] @ cp.multiply(W_cvx, a) <= b_ineq_pos.reshape(-1, 1))
+    if DictNeg[:, indx].shape[0] > 0:
+        constraints.append(DictNeg[:, indx] @ cp.multiply(W_cvx, a) >= b_ineq_neg.reshape(-1, 1))
+    
+
+
+    # if np.isinf(b_ineq_pos_upper_limit):
+    #     constraints += [DictPos[:, indx] @ (W[indx] * a) <= b_ineq_pos_upper_limit,
+    #                     DictNeg[:, indx] @ (W[indx] * a) >= b_ineq_neg_upper_limit]
+    xObs = xObs.reshape(-1, 1)
+    objective = cp.Minimize(cp.norm(Dict[:, indx] @ a - xObs))
+    prob = cp.Problem(objective, constraints)
+    prob.solve()
+
+    if prob.value > 1e3:
+        a = cp.Variable(j)
+        objective = cp.Minimize(cp.norm(Dict[:, indx] @ a - xObs))
+        prob = cp.Problem(objective)
         prob.solve()
-
-        if prob.value > 1e3:
-            objective = Minimize(norm(Dict[:, indx] @ a - xObs))
-            prob = Problem(objective)
-            prob.solve()
-    else:
-        a = Variable(j)
-        objective = Minimize(norm(Dict[:, indx] @ a - xObs))
-        constraints = [DictPos[:, indx] @ (W[indx] * a) >= b_ineq_pos,
-                       DictNeg[:, indx] @ (W[indx] * a) <= b_ineq_neg,
-                       DictPos[:, indx] @ (W[indx] * a) <= b_ineq_pos_upper_limit,
-                       DictNeg[:, indx] @ (W[indx] * a) >= b_ineq_neg_upper_limit]
-        prob = Problem(objective, constraints)
-        prob.solve()
-
-        if prob.value > 1e3:
-            objective = Minimize(norm(Dict[:, indx] @ a - xObs))
-            prob = Problem(objective)
-            prob.solve()
 
     indx = indx[:len(a.value)]
-
+       
     Coeff = csc_matrix((param['D'].shape[1], 1))
     if len(indx) > 0:
-        Coeff[indx, 0] = a
+        Coeff[indx, 0] = a.value
         W = W[:, np.newaxis] 
 
         Coeff = csc_matrix(W * Coeff.toarray())
     y = param['D'] @ Coeff
-
     return y
