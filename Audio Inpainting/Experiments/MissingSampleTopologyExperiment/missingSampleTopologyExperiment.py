@@ -34,9 +34,9 @@ def MissingSampleTopologyExperiment(expParam: Optional[Dict[str, Any]] = None) -
     if expParam is None:
         expParam = {}
     if 'soundDir' not in expParam:
-        expParam['soundDir'] = '../../Data/testSpeech8kHz_from16kHz/'
+        expParam['soundDir'] = 'Data/shortTest/'
     if 'destDir' not in expParam:
-        expParam['destDir'] = '../../tmp/missSampTopoExp/'
+        expParam['destDir'] = 'tmp/missSampTopoExp/'
     if not os.path.exists(expParam['destDir']):
         os.makedirs(expParam['destDir'])
 
@@ -97,11 +97,11 @@ def MissingSampleTopologyExperiment(expParam: Optional[Dict[str, Any]] = None) -
 
     # Choose the location of a frame at random, with a minimum energy
     maxDiffE2m = 10
-    frameParam['kFrameBegin'] = np.full(expParam['NFramesPerHoleSize'], np.nan)
+    frameParam['kFrameBegin'] = np.full(expParam['NFramesPerHoleSize'], -1, dtype=int)
     for kf in range(expParam['NFramesPerHoleSize']):
+        fs, siz = read(wavFiles[frameParam['kFrameFile'][kf]])
         while True:
-            fs, siz = read(wavFiles[frameParam['kFrameFile'][kf]])
-            frameParam['kFrameBegin'][kf] = np.random.randint(siz[0] - expParam['N'] + 1)
+            frameParam['kFrameBegin'][kf] = int(np.random.randint(len(siz) - expParam['N'] + 1))
             fs, x = read(wavFiles[frameParam['kFrameFile'][kf]], mmap=True)
             x = x[frameParam['kFrameBegin'][kf]:frameParam['kFrameBegin'][kf]+expParam['N']]
             E2m0 = 10 * np.log10(np.mean(np.abs(x**2)))
@@ -143,10 +143,20 @@ def MissingSampleTopologyExperiment(expParam: Optional[Dict[str, Any]] = None) -
     Ncols = int(np.ceil(np.sqrt(len(expParam['solvers'])) / Nrows))
     cmap = plt.get_cmap('tab10')
     fig, axs = plt.subplots(Nrows, Ncols)
+    if Nrows == 1 or Ncols == 1:
+        axs = np.array([axs])  # Convert axs to a 2-dimensional array
+    
+    print("Nrows: ", Nrows)
+    print("Ncols: ", Ncols)
+
     for kSolver in range(len(expParam['solvers'])):
         for kMiss in range(len(expParam['totalMissSamplesList'])):
-            axs[kSolver // Ncols, kSolver % Ncols].plot(factorsToTest[kMiss], np.mean(PerfRes[kMiss, kSolver], axis=1), color=cmap(kMiss))
-        axs[kSolver // Ncols, kSolver % Ncols].set_title(expParam['solvers'][kSolver]['name'])
+            print("Factors to test: ", factorsToTest[kMiss])
+            print("PerfRes: ", PerfRes[kMiss, kSolver])
+            print("Mean: ", np.mean(PerfRes[kMiss, kSolver]))
+            y_value = np.mean(PerfRes[kMiss, kSolver])
+            y_values = np.full_like(factorsToTest[kMiss], y_value)
+            axs[kSolver // Ncols, kSolver % Ncols].plot(factorsToTest[kMiss], y_values, color=cmap(kMiss))
     plt.show()
 
 def allFactors(n):
