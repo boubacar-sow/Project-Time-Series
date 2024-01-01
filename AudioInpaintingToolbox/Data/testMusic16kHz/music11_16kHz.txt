@@ -1,0 +1,3 @@
+License: These files are made available under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 2.0 license (http://creativecommons.org/licenses/by-nc-sa/2.0/).
+Authors: Shannon Hurley, Nine Inch Nails, AlexQ (Alexander Lozupone), Mokamed, Carl Leth and Jim's Big Ego for music source signals and Hiroshi Sawada for mixture signals.
+Downloaded from: http://sisec.wiki.irisa.fr/

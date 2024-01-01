@@ -1,0 +1,2 @@
+License and authors: these files are licensed for research use only by their authors (see list of authors below). The authors of the dataset are Mads Dyrholm and Lucas Parra. The music used for recordings was taken from "Germ Germ" by Das BÃ¶se Ding and has kindly been approved for public presentation by Jan Klare of Das BÃ¶se Ding in the name of research. 
+Download from: http://sisec2008.wiki.irisa.fr/
