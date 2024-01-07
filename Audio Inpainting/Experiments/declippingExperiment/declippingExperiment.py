@@ -18,6 +18,8 @@ from utils.wRect import wRect
 from Solvers.inpaintFrame_OMP_Gabor import inpaintFrame_OMP_Gabor
 from Solvers.inpaintFrame_consOMP import inpaintFrame_consOMP
 from Solvers.inpaintFrame_consOMP_Gabor import inpaintFrame_consOMP_Gabor
+from Solvers.inpaintFrame_beamOMP_Gabor import inpaintFrame_beamOMP_Gabor
+
 def declipping_experiment(exp_param=None):
     # Add paths to necessary directories
     # In Python, you can use sys.path.append(directory_path)
@@ -29,10 +31,10 @@ def declipping_experiment(exp_param=None):
     
     # Set default values for missing parameters
     if 'clippingScale' not in exp_param:
-        exp_param['clippingScale'] = np.arange(0.4, 1, 0.2)
+        exp_param['clippingScale'] = np.arange(0.7, 9, 0.1)
     if 'soundDir' not in exp_param:
-        exp_param['soundDir'] = 'Data/shortTest/male01_8kHz.wav'
         exp_param['soundDir'] = 'Data/shortTest/'
+        # exp_param['soundDir'] = 'Data/testSpeech8kHz_from16kHz/'
         warnings.warn('soundDir has only one sound to have faster computations. Recommended soundDir: ../../Data/testSpeech8kHz_from16kHz/')
     if 'destDir' not in exp_param:
         exp_param['destDir'] = 'tmp/declip/'
@@ -45,10 +47,18 @@ def declipping_experiment(exp_param=None):
         
         exp_param['solvers'] = []
         n_solver += 1
-        exp_param['solvers'].append({'name': 'consOMP-G', 'function': inpaintSignal_IndependentProcessingOfFrames, 
+        exp_param['solvers'].append({'name': 'consOMP_Gabor', 'function': inpaintSignal_IndependentProcessingOfFrames, 
                                      'param': {'N': 256, 'inpaintFrame': inpaintFrame_consOMP_Gabor, 'OMPerr': 0.001, 'sparsityDegree': 256/4, 
                                                'D_fun': Gabor_Dictionary, 'OLA_frameOverlapFactor': 2, 'redundancyFactor': 2, 'wd': wRect, 
                                                'wa': wRect, 'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 'MULTITHREAD_FRAME_PROCESSING': False}})
+        
+
+        n_solver += 1
+        exp_param['solvers'].append({'name': 'beamOMP_Gabor', 'function': inpaintSignal_IndependentProcessingOfFrames, 
+                                     'param': {'N': 256, 'inpaintFrame': inpaintFrame_beamOMP_Gabor, 'OMPerr': 0.001, 'sparsityDegree': 256/4, 
+                                               'D_fun': Gabor_Dictionary, 'OLA_frameOverlapFactor': 2, 'redundancyFactor': 2, 'wd': wRect, 
+                                               'wa': wRect, 'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 'MULTITHREAD_FRAME_PROCESSING': False}})
+
         n_solver += 1
         exp_param['solvers'].append({'name': 'Janssen', 'function': inpaintSignal_IndependentProcessingOfFrames, 
                                      'param': {'N': 256, 'inpaintFrame': inpaintFrame_janssenInterpolation, 'OLA_frameOverlapFactor': 2, 
@@ -60,18 +70,18 @@ def declipping_experiment(exp_param=None):
                                                'D_fun': Gabor_Dictionary, 'OLA_frameOverlapFactor': 2, 'redundancyFactor': 2, 'wd': wRect, 
                                                'wa': wRect, 'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 'MULTITHREAD_FRAME_PROCESSING': False}})
 
-        n_solver += 1
-        exp_param['solvers'].append({'name': 'OMP-C', 'function': inpaintSignal_IndependentProcessingOfFrames, 
-                                     'param': {'N': 256, 'inpaintFrame': inpaintFrame_OMP, 'OMPerr': 0.001, 
-                                               'sparsityDegree': 256/4, 'D_fun': DCT_Dictionary, 'OLA_frameOverlapFactor': 2, 
-                                               'redundancyFactor': 2, 'wd': wRect, 'wa': wRect, 'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 
-                                               'MULTITHREAD_FRAME_PROCESSING': False}})
+        # n_solver += 1
+        # exp_param['solvers'].append({'name': 'OMP-C', 'function': inpaintSignal_IndependentProcessingOfFrames, 
+        #                              'param': {'N': 256, 'inpaintFrame': inpaintFrame_OMP, 'OMPerr': 0.001, 
+        #                                        'sparsityDegree': 256/4, 'D_fun': DCT_Dictionary, 'OLA_frameOverlapFactor': 2, 
+        #                                        'redundancyFactor': 2, 'wd': wRect, 'wa': wRect, 'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 
+        #                                        'MULTITHREAD_FRAME_PROCESSING': False}})
 
-        n_solver += 1
-        exp_param['solvers'].append({'name': 'consOMP-C', 'function': inpaintSignal_IndependentProcessingOfFrames, 
-                                     'param': {'N': 256, 'inpaintFrame': inpaintFrame_consOMP, 'OMPerr': 0.001, 'sparsityDegree': 256/4, 
-                                               'D_fun': DCT_Dictionary, 'OLA_frameOverlapFactor': 2, 'redundancyFactor': 2, 'wd': wRect, 'wa': wRect, 
-                                               'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 'MULTITHREAD_FRAME_PROCESSING': False}})
+        # n_solver += 1
+        # exp_param['solvers'].append({'name': 'consOMP-C', 'function': inpaintSignal_IndependentProcessingOfFrames, 
+        #                              'param': {'N': 256, 'inpaintFrame': inpaintFrame_consOMP, 'OMPerr': 0.001, 'sparsityDegree': 256/4, 
+        #                                        'D_fun': DCT_Dictionary, 'OLA_frameOverlapFactor': 2, 'redundancyFactor': 2, 'wd': wRect, 'wa': wRect, 
+        #                                        'OLA_ws': wSine, 'SKIP_CLEAN_FRAMES': True, 'MULTITHREAD_FRAME_PROCESSING': False}})
 
 
 
